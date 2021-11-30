@@ -1,4 +1,23 @@
+const getCourses = async context => {
+  const instructorId = context.result.id;
+  const courses = await context.app.services.courses.find({
+    query: {
+      instructorId: instructorId
+    }
+  });
+  context.result.courses = courses.data;
+  return context;
+};
 
+const getAllCourses = async context => {
+  context.result.data = await Promise.all(context.result.data.map(async instructor => {
+    const courses = await context.app.services.courses.find({ query: { instructorId: instructor.id } });
+    instructor.courses = courses.data;
+    console.log(instructor);
+    return instructor;
+  }));
+  return context;
+};
 
 module.exports = {
   before: {
@@ -13,8 +32,8 @@ module.exports = {
 
   after: {
     all: [],
-    find: [],
-    get: [],
+    find: [getAllCourses],
+    get: [getCourses],
     create: [],
     update: [],
     patch: [],
